@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR Quest - Juego 3D</title>
+
+ 
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+ 
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.7/aframe/build/aframe-ar.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    #panel {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.75);
+      color: white;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 18px;
+    }
+
+    #reiniciar {
+      margin-top: 8px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="panel">
+    <div>Puntos: <span id="puntos">0</span></div>
+    <div>Tiempo: <span id="tiempo">60</span> s</div>
+    <button id="reiniciar">Reiniciar</button>
+  </div>
+
+  <a-scene
+    embedded
+    vr-mode-ui="enabled: false"
+    arjs="sourceType: webcam; debugUIEnabled: false;"
+    renderer="logarithmicDepthBuffer: true;">
+
+  
+    <a-marker preset="hiro" id="marcador">
+
+      <a-cylinder
+        class="moneda"
+        position="-0.6 0.7 0"
+        radius="0.22"
+        height="0.08"
+        color="#FFD700"
+        rotation="90 0 0"
+        animation="property: rotation; to: 90 360 0;
+          loop: true; dur: 2500"
+        cursor-listener>
+      </a-cylinder>
+
+      <a-octahedron
+        class="moneda"
+        position="0 0.8 0"
+        radius="0.25"
+        color="#00FFFF"
+        animation="property: rotation; to: 360 360 0;
+          loop: true; dur: 3000"
+        cursor-listener>
+      </a-octahedron>
+
+      <a-sphere
+        class="moneda"
+        position="0.6 0.7 0"
+        radius="0.2"
+        color="#FF4444"
+        animation="property: position; to: 0.6 1 0;
+          dir: alternate; loop: true; dur: 900"
+        cursor-listener>
+      </a-sphere>
+
+    </a-marker>
+
+    <a-entity camera>
+      <a-cursor
+        raycaster="objects: .moneda"
+        fuse="false"
+        color="yellow">
+      </a-cursor>
+    </a-entity>
+
+  </a-scene>
+
+  <script>
+    let puntos = 0;
+    let tiempo = 60;
+    let partidaActiva = true;
+
+    const textoPuntos = document.getElementById("puntos");
+    const textoTiempo = document.getElementById("tiempo");
+
+    AFRAME.registerComponent("cursor-listener", {
+      init: function () {
+        this.el.addEventListener("click", () => {
+          if (!partidaActiva) return;
+          if (this.el.getAttribute("visible") === false) return;
+
+          puntos += 10;
+          textoPuntos.textContent = puntos;
+
+          this.el.setAttribute("visible", false);
+        });
+      }
+    });
+
+    function reiniciarJuego() {
+      puntos = 0;
+      tiempo = 60;
+      partidaActiva = true;
+
+      textoPuntos.textContent = puntos;
+      textoTiempo.textContent = tiempo;
+
+      document.querySelectorAll(".moneda").forEach(objeto => {
+        objeto.setAttribute("visible", true);
+      });
+    }
+
+    document.getElementById("reiniciar")
+      .addEventListener("click", reiniciarJuego);
+
+    setInterval(() => {
+      if (!partidaActiva) return;
+
+      tiempo--;
+      textoTiempo.textContent = tiempo;
+
+      if (tiempo <= 0) {
+        partidaActiva = false;
+        alert("¡Juego terminado! Puntos: " + puntos);
+      }
+    }, 1000);
+  </script>
+
+</body>
+</html>
